@@ -50,7 +50,7 @@ class Androgens(mesa.Agent):
 
 
     def _increase_exhaustion(self):
-        self.exhaustion += 0.1
+        self.exhaustion += 0.4
         if self.exhaustion >= 1.0:
             self.state = "exhausted"
         self.exhaustion = min(self.exhaustion, 1.0) 

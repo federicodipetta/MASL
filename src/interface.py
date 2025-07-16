@@ -31,9 +31,9 @@ model_params = {
         "label": "Sex",
         "values": ["male", "female"]
     },
-    "ICI": {
+    "nICI": {
         "type": "SliderInt",
-        "value": 0,
+        "value": 20,
         "label": "ICI Agents",
         "min": 0,
         "max": 100,
@@ -41,7 +41,7 @@ model_params = {
     },
     "nTCell": {
         "type": "SliderInt",
-        "value": 12,
+        "value": 70,
         "label": "Number of T Cells",
         "min": 1,
         "max": 1000,
@@ -57,7 +57,7 @@ model_params = {
     },
     "nAndrogens": {
         "type": "SliderInt",
-        "value": 2,
+        "value": 20,
         "label": "Number of Androgens",
         "min": 0,
         "max": 500,
@@ -65,7 +65,7 @@ model_params = {
     },
     "nTumorCells": {
         "type": "SliderInt",
-        "value": 8,
+        "value": 179,
         "label": "Number of Tumor Cells",
         "min": 1,
         "max": 1000,
@@ -151,7 +151,7 @@ def Page() -> SolaraViz:
         width=model_params["width"]["value"],
         height=model_params["height"]["value"],
         sex=model_params["sex"]["value"],
-        ICI=model_params["ICI"]["value"],
+        nICI=model_params["nICI"]["value"],
         nTCell=model_params["nTCell"]["value"],
         nTReg=model_params["nTReg"]["value"],
         nAndrogens=model_params["nAndrogens"]["value"],
@@ -160,7 +160,7 @@ def Page() -> SolaraViz:
     )
     solara_viz = SolaraViz(
         model,
-        components=[SpaceGraph, AgentCountPlot, ExhaustionPlot],
+        components=[SpaceGraph, AgentCountPlot],
         model_params=model_params,
         name="RCC",
     )

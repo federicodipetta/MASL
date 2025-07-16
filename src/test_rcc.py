@@ -19,7 +19,7 @@ class TestBasicRCCModel:
             width=10,
             height=10,
             sex="male",
-            ICI=0
+            nICI=0
         )
 
         assert model.width == 10
@@ -34,7 +34,7 @@ class TestBasicRCCModel:
             width=10,
             height=10,
             sex="male",
-            ICI=0
+            nICI=0
         )
         initial_TRegs = len(model.agents.select(agent_type=TReg))
         model._add_TReg()
@@ -68,7 +68,7 @@ class TestScenario:
             nTReg=0,
             nTCell=1,
             nTumorCells=11,
-            ICI=0
+            nICI=0
         )
 
         assert len(model.agents.select(agent_type=TumorCell)) > len(model.agents.select(agent_type=TCell)), \
@@ -109,26 +109,26 @@ class TestScenario:
         Test the influence of sex on the model.
         """
         model_male = RCCModel(
-            width=20,
-            height=20,
+            width=15,
+            height=15,
             nTCell=5,
-            nTumorCells=20,
-            ICI=7,
+            nTumorCells=50,
+            nICI=12,
             sex="male",
             seed=42
         )     
 
         model_female = RCCModel(
-            width=20,
-            height=20,
+            width=15,
+            height=15,
             nTCell=5,
-            nTumorCells=20,
-            ICI=7,
+            nTumorCells=50,
+            nICI=12,
             sex="female",
             seed=42
         )
 
-        for _ in range(50):
+        for _ in range(100):
             model_male.step()
             model_female.step()
 
@@ -140,5 +140,6 @@ class TestScenario:
         assert len(model_female.agents.select(agent_type=TumorCell)) < len(model_male.agents.select(agent_type=TumorCell)), \
             "There should be more TumorCells in the female model."
         
-    
-        
+        print (len(model_female.agents.select(agent_type=TumorCell)))
+        print (len(model_male.agents.select(agent_type=TumorCell)))
+

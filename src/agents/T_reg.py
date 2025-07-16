@@ -16,9 +16,8 @@ class TReg(mesa.Agent):
         self._move_to_TCell()
 
         # Attack TCell
-        
-                
-    
+        self._attack_TCell()
+
     def _move_to_TCell(self):
         new_pos = au.find_and_move_towards_agent_type(
             self.pos,

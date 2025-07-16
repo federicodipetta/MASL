@@ -2,7 +2,7 @@ import math
 import mesa
 from mesa.space import MultiGrid
 from mesa.datacollection import DataCollector
-from agents import TCell, TumorCell, TReg, Androgens
+from agents import ICI, TCell, TumorCell, TReg, Androgens
 
 class RCCModel(mesa.Model):
     """
@@ -12,7 +12,7 @@ class RCCModel(mesa.Model):
             width=20,
             height=20, 
             sex: str = "male", 
-            ICI: int = 0,
+            nICI: int = 0,
             nTCell: int = 12,
             nTReg: int = 2,
             nAndrogens: int = 2,
@@ -50,6 +50,12 @@ class RCCModel(mesa.Model):
             y = self.random.randrange(self.height)
             androgen = Androgens(self)
             self.grid.place_agent(androgen, (x, y))
+        
+        for i in range(nICI):
+            x = self.random.randrange(self.width)
+            y = self.random.randrange(self.height)
+            icer = ICI(self)
+            self.grid.place_agent(icer, (x, y))
         # Create tumor cells
         self._create_tumor_mass(num_cells=nTumorCells)
         self.datacollector = DataCollector(
@@ -104,10 +110,9 @@ class RCCModel(mesa.Model):
         Add TReg agents based on the number of exhaustion of TCells.
         """
         TCells = self.agents.select(agent_type=TCell)
-        TCells_active = [agent for agent in TCells if agent.state == "active"]
+        TCells_active = [agent for agent in TCells]
         exhaustions = [agent.exhaustion for agent in TCells_active]
         mean_exhaustion = sum(exhaustions) / len(exhaustions) if exhaustions else 0
-        # Tregs grow based on the average exhaustion of TCells
         # When the mean is high, TRegs are less likely to spawn
         num_TReg = 10 - int(mean_exhaustion * 10)
         if num_TReg < 0:
@@ -123,10 +128,9 @@ class RCCModel(mesa.Model):
             # If female, the immune system is more active
             # so the probability of spawning TReg is increased
             if self.sex == "female":
-                prob = min(prob * 1.5, 1)
+                prob = min(prob * 2, 1)
             if prob < 0.01:
                 prob = 0.01
-            print(f"{self.sex}: Adding TReg with probability: {prob}")
             if self.random.random() < prob:
                 x = self.random.randrange(self.width)
                 y = self.random.randrange(self.height)
@@ -181,6 +185,23 @@ class RCCModel(mesa.Model):
         """
         self.grid.remove_agent(agent)
         self.agents.remove(agent)
+
+    def get_tumor_coverage_percentage(self):
+        """
+        Calculate the percentage of grid cells occupied by tumor cells.
+        """
+        tumor_cells = self.agents.select(agent_type=TumorCell)
+        total_cells = self.width * self.height
+        return len(tumor_cells) / total_cells * 100
+
+    def is_patient_alive(self, death_threshold=70):
+        """
+        Check if patient is still alive based on tumor coverage.
+        
+        :param death_threshold: Percentage of tumor coverage that causes death
+        :return: True if patient is alive, False otherwise
+        """
+        return self.get_tumor_coverage_percentage() < death_threshold
         
     
       

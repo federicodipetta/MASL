@@ -38,7 +38,7 @@ class TumorCell(mesa.Agent):
         
         # Create new tumor cell if there's space
         # It can proliferate with a probability of 0.1
-        if empty_positions and self.model.random.random() < 0.01:
+        if empty_positions and self.model.random.random() < 0.05:
             new_pos = self.model.random.choice(empty_positions)
             new_tumor_cell = TumorCell(self.model)
             self.model.grid.place_agent(new_tumor_cell, new_pos)
