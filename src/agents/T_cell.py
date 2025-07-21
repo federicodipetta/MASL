@@ -16,6 +16,10 @@ class TCell(mesa.Agent):
         super().__init__(model)
         self.type = "TCell"
         self.state = "active"
+        self.exhaustion_from_TReg = model.TCell_exhaustion_TReg
+        self.exhaustion_from_Androgens = model.TCell_exhaustion_Androgens
+        self.exhaustion_from_Tumor = model.TCell_exhaustion_Tumor
+        self.activation_from_ICI = model.TCell_activation_ICI
         self.exhaustion = 0.0
         
         
@@ -29,7 +33,7 @@ class TCell(mesa.Agent):
             self._move_to_tumor()
             self.attack()
         elif self.state == "exhausted":
-            #When exhausted it stay incative until Androgen or ICI activate it
+            #When exhausted it stay incative until ICI activate it
             pass
 
     def attack(self):
@@ -40,22 +44,26 @@ class TCell(mesa.Agent):
         neighbors = self.model.grid.get_neighbors(self.pos, moore=True, include_center=True)
         tumor_cells = [agent for agent in neighbors if isinstance(agent, TumorCell)]
         # Attack the first tumor cell found
-        if tumor_cells:
+        if tumor_cells and self.state == "active":
             target = self.model.random.choice(tumor_cells)
             target.receive_attack()
-            # add exhaustion to T cell, influenced by androgen or ICI
-            self.exhaustion += 0.1 
+            self.exhaustion += self.exhaustion_from_Tumor
+            self.exhaustion = min(self.exhaustion, 1.0)  # Cap exhaustion at 1.0
+            if self.exhaustion >= 1:
+                self.state = "exhausted"
+            else:
+                self.state = "active"
 
     def receive_attack(self, attacker: str = "TReg"):
         """
         Handle receiving an attack from TReg or Androgen.
         """
         if attacker == "TReg":
-            self.exhaustion += 0.2
+            self.exhaustion += self.exhaustion_from_TReg
         elif attacker == "Androgen":
-            self.exhaustion += 0.4
-        
-        self.exhaustion = min(self.exhaustion, 1.0)  # Cap exhaustion at 1.0    
+            self.exhaustion += self.exhaustion_from_Androgens
+
+        self.exhaustion = min(self.exhaustion, 1.0)  # Cap exhaustion at 1.0
         if self.exhaustion >= 1:
             self.state = "exhausted"
         else:
@@ -85,7 +93,7 @@ class TCell(mesa.Agent):
         """
         Activate T cell by ICI, reducing exhaustion.
         """
-        self.exhaustion -= 0.2
+        self.exhaustion -= self.activation_from_ICI
         if self.exhaustion < 0:
             self.exhaustion = 0
         if self.exhaustion < 1.0:

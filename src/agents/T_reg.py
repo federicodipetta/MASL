@@ -33,6 +33,6 @@ class TReg(mesa.Agent):
         neighbors_TCell = [n for n in neighbors if isinstance(n, TCell)]
         if neighbors_TCell:
             target: TCell = self.model.random.choice(neighbors_TCell)
-            target.receive_attack()
+            target.receive_attack(attacker="TReg")
 
         

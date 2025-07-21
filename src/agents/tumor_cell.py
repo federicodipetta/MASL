@@ -14,6 +14,7 @@ class TumorCell(mesa.Agent):
         super().__init__(model)
         self.type = "TumorCell"
         self.state = "active"
+        self.p_proliferate = model.p_TumorCell_add 
     
     def step(self):
         """
@@ -37,8 +38,7 @@ class TumorCell(mesa.Agent):
                 empty_positions.append(pos)
         
         # Create new tumor cell if there's space
-        # It can proliferate with a probability of 0.1
-        if empty_positions and self.model.random.random() < 0.05:
+        if empty_positions and self.model.random.random() < self.p_proliferate:
             new_pos = self.model.random.choice(empty_positions)
             new_tumor_cell = TumorCell(self.model)
             self.model.grid.place_agent(new_tumor_cell, new_pos)

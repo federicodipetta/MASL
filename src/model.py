@@ -17,7 +17,15 @@ class RCCModel(mesa.Model):
             nTReg: int = 2,
             nAndrogens: int = 2,
             nTumorCells: int = 8,
-            seed: float | None = None
+            seed: float | None = None,
+            # Probabilities and other parameters for optimization
+            p_TReg_add: float = 0.05,
+            TCell_exhaustion_Tumor: float = 0.1,
+            TCell_exhaustion_TReg: float = 0.2,
+            TCell_exhaustion_Androgens: float = 0.4,
+            TCell_activation_ICI: float = 0.2,
+            p_TumorCell_add: float = 0.1,
+            ICI_exhaustion: float = 0.1
         ):
         """
         Initialize the model with a grid of specified dimensions.
@@ -33,6 +41,13 @@ class RCCModel(mesa.Model):
         self.sex = sex
         self.search_radius = 3  # Radius for searching agents
 
+        self.p_TReg_add = p_TReg_add
+        self.TCell_exhaustion_Tumor = TCell_exhaustion_Tumor
+        self.TCell_exhaustion_TReg = TCell_exhaustion_TReg
+        self.TCell_exhaustion_Androgens = TCell_exhaustion_Androgens
+        self.TCell_activation_ICI = TCell_activation_ICI
+        self.p_TumorCell_add = p_TumorCell_add
+        self.ICI_exhaustion = ICI_exhaustion
         # Create T cells
         for i in range(nTCell):
             x = self.random.randrange(self.width)
@@ -67,25 +82,39 @@ class RCCModel(mesa.Model):
                 "T Regulatory Cells": lambda m: len([a for a in m.space.agents if isinstance(a, TReg)]),
                 "Androgens": lambda m: len([a for a in m.space.agents if isinstance(a, Androgens)]),
                 "Average T Cell Exhaustion": lambda m: sum([a.exhaustion for a in m.space.agents if isinstance(a, TCell)]) / max(1, len([a for a in m.space.agents if isinstance(a, TCell)])),
+                "Dead": lambda m: not m.is_patient_alive(),
+                "Tumor Defeated": lambda m: len(m.agents.select(agent_type=TumorCell)) == 0,
             },
             agent_reporters={
                 "Exhaustion": lambda a: getattr(a, 'exhaustion', 0) if isinstance(a, TCell) else None,
                 "State": lambda a: getattr(a, 'state', None),
                 "Type": lambda a: type(a).__name__,
             }
-        )  
+        )
+
+        self.running = True
+        self.datacollector.collect(self)
+
+
+    def run_model(self):
+        """
+        Run the model for a specified number of steps.
+        """
+        while self.running and self.is_patient_alive() and not self.agents.select(agent_type=TumorCell):
+            self.step()
+            
 
     def step(self):
         """
         Perform a step in the model, updating all agents.
         """
-        self.datacollector.collect(self)
 
         self.agents.do("step")
         
         self._add_TReg()
-        
 
+        self.datacollector.collect(self)
+        
     def _create_tumor_mass(self, num_cells=5):
         """
         Create a mass of tumor cells at a random position on the grid.
@@ -183,8 +212,8 @@ class RCCModel(mesa.Model):
         
         :param agent: The agent to remove.
         """
+        self.deregister_agent(agent)
         self.grid.remove_agent(agent)
-        self.agents.remove(agent)
 
     def get_tumor_coverage_percentage(self):
         """

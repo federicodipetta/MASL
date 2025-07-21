@@ -21,6 +21,7 @@ class ICI(mesa.Agent):
         Perform the step for the ICI agent.
         """
         # Example behavior: ICI agents can enhance T cell activity
+        self.move()
         self._enhance_T_cells()
 
     def _enhance_T_cells(self):
@@ -31,10 +32,8 @@ class ICI(mesa.Agent):
         TCells = [agent for agent in neighbors if isinstance(agent, TCell)]
         
         for tcell in TCells:
-            if tcell.state == "exhausted":
-                tcell.exhaustion -= 0.1  # Reduce exhaustion level
-                if tcell.exhaustion < 0:
-                    tcell.exhaustion = 0
+            tcell: TCell = tcell
+            tcell.ICI_activation()
 
     def move(self):
         """
