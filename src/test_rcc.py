@@ -50,7 +50,8 @@ class TestBasicRCCModel:
         """
         model = RCCModel(
             width=10,
-            height=10
+            height=10,
+            nTumorCells=40,
         )
         density = model.get_blood_vessles_density()
         assert 0 <= density <= 1, "Blood vessel density should be between 0 and 1"
@@ -112,20 +113,22 @@ class TestScenario:
             width=15,
             height=15,
             nTCell=5,
+            nTReg=1,
             nTumorCells=50,
             nICI=12,
             sex="male",
-            seed=42
+            seed=40
         )     
 
         model_female = RCCModel(
             width=15,
             height=15,
             nTCell=5,
+            nTReg=1,
             nTumorCells=50,
             nICI=12,
             sex="female",
-            seed=42
+            seed=40
         )
 
         for _ in range(100):

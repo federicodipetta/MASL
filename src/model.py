@@ -9,23 +9,22 @@ class RCCModel(mesa.Model):
     Model class representing the immune system simulation.
     """
     def __init__(self,
-            width=20,
-            height=20, 
+            width=150,
+            height=150, 
             sex: str = "male", 
-            nICI: int = 0,
-            nTCell: int = 12,
-            nTReg: int = 2,
-            nAndrogens: int = 2,
-            nTumorCells: int = 8,
+            nICI: int = 2,
+            nTCell: int = 373,
+            nTReg: int = 0,
+            nAndrogens: int = 371,
+            nTumorCells: int = 394,
             seed: float | None = None,
-            # Probabilities and other parameters for optimization
-            p_TReg_add: float = 0.05,
-            TCell_exhaustion_Tumor: float = 0.1,
-            TCell_exhaustion_TReg: float = 0.2,
-            TCell_exhaustion_Androgens: float = 0.4,
-            TCell_activation_ICI: float = 0.2,
-            p_TumorCell_add: float = 0.1,
-            ICI_exhaustion: float = 0.1
+            p_TReg_add: float = 0.24287156301254542,
+            TCell_exhaustion_Tumor: float = 0.04001731201879627,
+            TCell_exhaustion_TReg: float = 0.16934907608400246,
+            TCell_exhaustion_Androgens: float = 0.1666884991199096,
+            TCell_activation_ICI: float = 0.15767026596715517,
+            p_TumorCell_add: float = 0.031642094522462534,
+            ICI_exhaustion: float = 0.5098813436502578
         ):
         """
         Initialize the model with a grid of specified dimensions.
@@ -34,6 +33,8 @@ class RCCModel(mesa.Model):
         :param height: Height of the grid.
         """
         super().__init__(seed=seed)
+        self.last_tcell_count_step = None
+
         self.space = MultiGrid(width, height, torus=True)
         self.grid = self.space
         self.width = width
@@ -49,13 +50,13 @@ class RCCModel(mesa.Model):
         self.p_TumorCell_add = p_TumorCell_add
         self.ICI_exhaustion = ICI_exhaustion
         # Create T cells
-        for i in range(nTCell):
+        for _ in range(nTCell):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             tcell = TCell(self)
             self.grid.place_agent(tcell, (x, y))
 
-        for i in range(nTReg):
+        for _ in range(nTReg if sex == 'male' else int(nTReg + nTReg * 0.1)):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             treg = TReg(self)
@@ -65,8 +66,8 @@ class RCCModel(mesa.Model):
             y = self.random.randrange(self.height)
             androgen = Androgens(self)
             self.grid.place_agent(androgen, (x, y))
-        
-        for i in range(nICI):
+
+        for _ in range(nICI):
             x = self.random.randrange(self.width)
             y = self.random.randrange(self.height)
             icer = ICI(self)
@@ -84,6 +85,7 @@ class RCCModel(mesa.Model):
                 "Average T Cell Exhaustion": lambda m: sum([a.exhaustion for a in m.space.agents if isinstance(a, TCell)]) / max(1, len([a for a in m.space.agents if isinstance(a, TCell)])),
                 "Dead": lambda m: not m.is_patient_alive(),
                 "Tumor Defeated": lambda m: len(m.agents.select(agent_type=TumorCell)) == 0,
+                "Step": lambda m: m.steps
             },
             agent_reporters={
                 "Exhaustion": lambda a: getattr(a, 'exhaustion', 0) if isinstance(a, TCell) else None,
@@ -96,19 +98,36 @@ class RCCModel(mesa.Model):
         self.datacollector.collect(self)
 
 
-    def run_model(self):
+    def run_model(self, max_steps=2000):
         """
-        Run the model for a specified number of steps.
+        Run the model until patient dies, tumor is defeated, or max steps reached.
+        
+        :param max_steps: Maximum number of steps to run
         """
-        while self.running and self.is_patient_alive() and not self.agents.select(agent_type=TumorCell):
+        
+        while (self.running and 
+            self.is_patient_alive() and 
+            len(self.agents.select(agent_type=TumorCell)) > 0 and
+            self.steps < max_steps):
             self.step()
-            
+        
+        # Set running to False when simulation ends
+        self.running = False
+        
+        # Optional: log why the simulation ended
+        if not self.is_patient_alive():
+            print(f"Simulation ended: Patient died at step {self.steps}")
+        elif len(self.agents.select(agent_type=TumorCell)) == 0:
+            print(f"Simulation ended: Tumor defeated at step {self.steps}")
+        elif self.steps >= max_steps:
+            print(f"Simulation ended: Max steps ({max_steps}) reached")
+                
 
     def step(self):
         """
         Perform a step in the model, updating all agents.
         """
-
+        super().step()
         self.agents.do("step")
         
         self._add_TReg()
@@ -223,13 +242,22 @@ class RCCModel(mesa.Model):
         total_cells = self.width * self.height
         return len(tumor_cells) / total_cells * 100
 
-    def is_patient_alive(self, death_threshold=70):
+    def is_patient_alive(self, death_threshold=40):
         """
         Check if patient is still alive based on tumor coverage.
         
         :param death_threshold: Percentage of tumor coverage that causes death
         :return: True if patient is alive, False otherwise
         """
+        n_tcells = len(self.agents.select(agent_type=TCell, filter_func=lambda a: a.state == "active"))
+        if n_tcells and self.last_tcell_count_step is None:
+            self.last_tcell_count_step = self.steps
+        elif n_tcells > 0:
+            self.last_tcell_count_step = None
+        
+        if self.last_tcell_count_step is not None and self.steps - (self.last_tcell_count_step or 0) > 100:
+            return False
+        
         return self.get_tumor_coverage_percentage() < death_threshold
         
     

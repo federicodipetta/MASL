@@ -11,7 +11,7 @@ from agents import TCell, TumorCell, TReg, Androgens, ICI
 model_params = {
     "width": {
         "type": "SliderInt",
-        "value": 50,
+        "value": 150,
         "label": "Grid Width",
         "min": 10,
         "max": 200,
@@ -19,7 +19,7 @@ model_params = {
     },
     "height": {
         "type": "SliderInt", 
-        "value": 50,
+        "value": 150,
         "label": "Grid Height",
         "min": 10,
         "max": 200,
@@ -33,7 +33,7 @@ model_params = {
     },
     "nICI": {
         "type": "SliderInt",
-        "value": 20,
+        "value": 2,
         "label": "ICI Agents",
         "min": 0,
         "max": 100,
@@ -41,7 +41,7 @@ model_params = {
     },
     "nTCell": {
         "type": "SliderInt",
-        "value": 70,
+        "value": 373,
         "label": "Number of T Cells",
         "min": 1,
         "max": 1000,
@@ -49,7 +49,7 @@ model_params = {
     },
     "nTReg": {
         "type": "SliderInt",
-        "value": 2,
+        "value": 0,
         "label": "Number of T Regulatory Cells",
         "min": 0,
         "max": 20,
@@ -57,7 +57,7 @@ model_params = {
     },
     "nAndrogens": {
         "type": "SliderInt",
-        "value": 20,
+        "value": 371,
         "label": "Number of Androgens",
         "min": 0,
         "max": 500,
@@ -65,7 +65,7 @@ model_params = {
     },
     "nTumorCells": {
         "type": "SliderInt",
-        "value": 179,
+        "value": 394,
         "label": "Number of Tumor Cells",
         "min": 1,
         "max": 1000,
