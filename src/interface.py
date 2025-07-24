@@ -33,7 +33,7 @@ model_params = {
     },
     "nICI": {
         "type": "SliderInt",
-        "value": 2,
+        "value": 86,
         "label": "ICI Agents",
         "min": 0,
         "max": 100,
@@ -41,7 +41,7 @@ model_params = {
     },
     "nTCell": {
         "type": "SliderInt",
-        "value": 373,
+        "value": 291,
         "label": "Number of T Cells",
         "min": 1,
         "max": 1000,
@@ -49,15 +49,15 @@ model_params = {
     },
     "nTReg": {
         "type": "SliderInt",
-        "value": 0,
+        "value": 92,
         "label": "Number of T Regulatory Cells",
         "min": 0,
-        "max": 20,
+        "max": 100,
         "step": 1,
     },
     "nAndrogens": {
         "type": "SliderInt",
-        "value": 371,
+        "value": 167,
         "label": "Number of Androgens",
         "min": 0,
         "max": 500,
@@ -65,7 +65,7 @@ model_params = {
     },
     "nTumorCells": {
         "type": "SliderInt",
-        "value": 394,
+        "value": 214,
         "label": "Number of Tumor Cells",
         "min": 1,
         "max": 1000,
@@ -140,7 +140,7 @@ def Page() -> SolaraViz:
     SpaceGraph = make_space_altair(agent_portrayal)
 
     AgentCountPlot = make_plot_component(
-        ["T Cells", "Active T Cells", "Exhausted T Cells", "Tumor Cells", "T Regulatory Cells", "Androgens"]
+        ["Active T Cells", "Exhausted T Cells", "Tumor Cells", "T Regulatory Cells"]
     )
     
     ExhaustionPlot = make_plot_component(

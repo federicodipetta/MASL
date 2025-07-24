@@ -12,19 +12,19 @@ class RCCModel(mesa.Model):
             width=150,
             height=150, 
             sex: str = "male", 
-            nICI: int = 2,
-            nTCell: int = 373,
-            nTReg: int = 0,
-            nAndrogens: int = 371,
-            nTumorCells: int = 394,
+            nICI: int = 86,
+            nTCell: int = 291,
+            nTReg: int = 92,
+            nAndrogens: int = 167,
+            nTumorCells: int = 214,
             seed: float | None = None,
-            p_TReg_add: float = 0.24287156301254542,
-            TCell_exhaustion_Tumor: float = 0.04001731201879627,
-            TCell_exhaustion_TReg: float = 0.16934907608400246,
-            TCell_exhaustion_Androgens: float = 0.1666884991199096,
-            TCell_activation_ICI: float = 0.15767026596715517,
-            p_TumorCell_add: float = 0.031642094522462534,
-            ICI_exhaustion: float = 0.5098813436502578
+            p_TReg_add: float = 0.9455159710836611,
+            TCell_exhaustion_Tumor: float = 0.015002416716210425,
+            TCell_exhaustion_TReg: float = 0.05767886266446183,
+            TCell_exhaustion_Androgens: float = 0.4614939932505977,
+            TCell_activation_ICI: float = 0.3191022554319344,
+            p_TumorCell_add: float = 0.03076921174931774,
+            ICI_exhaustion: float = 0.36224357262500845
         ):
         """
         Initialize the model with a grid of specified dimensions.

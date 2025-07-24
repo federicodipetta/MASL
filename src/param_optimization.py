@@ -12,7 +12,7 @@ def objective_optuna(trial):
     height = 150
     nTCell = trial.suggest_int('nTCell', 100, 500)
     nTumorCells = trial.suggest_int('nTumorCells', 200, 400)
-    nTReg = trial.suggest_int('nTReg', 0, 20)
+    nTReg = trial.suggest_int('nTReg', 0, 100)
     nAndrogens = trial.suggest_int('nAndrogens', 0, 500)
     nICI = trial.suggest_int('nICI', 0, 100)
 
@@ -21,7 +21,7 @@ def objective_optuna(trial):
     TCell_exhaustion_TReg = trial.suggest_float('TCell_exhaustion_TReg', 0.01, 1.0)
     TCell_exhaustion_Androgens = trial.suggest_float('TCell_exhaustion_Androgens', 0.01, 1.0)
     TCell_activation_ICI = trial.suggest_float('TCell_activation_ICI', 0.01, 1.0)
-    p_TumorCell_add = trial.suggest_float('p_TumorCell_add', 0.01, 1.0)
+    p_TumorCell_add = trial.suggest_float('p_TumorCell_add', 0.1, 1.0)
     ICI_exhaustion = trial.suggest_float('ICI_exhaustion', 0.01, 1.0)
     
     # Create and run model
